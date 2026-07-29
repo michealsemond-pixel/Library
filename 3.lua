@@ -445,7 +445,6 @@ do
     local Funcs = {};
 
     function Funcs:AddColorPicker(Idx, Info)
-        local AddonParent = self.AddonHolder or self.TextLabel;
         local ToggleLabel = self.TextLabel;
         -- local Container = self.Container;
 
@@ -474,8 +473,9 @@ do
             BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             BorderMode = Enum.BorderMode.Inset;
             Size = UDim2.new(0, 24, 0, 14);
+            LayoutOrder = 2;
             ZIndex = 10;
-            Parent = AddonParent;
+            Parent = ToggleLabel;
         });
 
         Library:ApplySmoothGradient(DisplayFrame, ColorPicker.Value, 90);
@@ -1041,7 +1041,6 @@ do
 
     function Funcs:AddKeyPicker(Idx, Info)
         local ParentObj = self;
-        local AddonParent = self.AddonHolder or self.TextLabel;
         local ToggleLabel = self.TextLabel;
         local Container = self.Container;
 
@@ -1067,8 +1066,9 @@ do
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 28, 0, 15);
+            LayoutOrder = 2;
             ZIndex = 6;
-            Parent = AddonParent;
+            Parent = ToggleLabel;
         });
 
         local PickInner = Library:Create('Frame', {
@@ -1869,29 +1869,12 @@ do
         local Groupbox = self;
         local Container = Groupbox.Container;
 
-        local ToggleRow = Library:Create('Frame', {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(1, 0, 0, 13);
-            ZIndex = 5;
-            Parent = Container;
-        });
-
-        Library:Create('UIListLayout', {
-            FillDirection = Enum.FillDirection.Horizontal;
-            VerticalAlignment = Enum.VerticalAlignment.Center;
-            HorizontalAlignment = Enum.HorizontalAlignment.Left;
-            Padding = UDim.new(0, 4);
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = ToggleRow;
-        });
-
         local ToggleOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 13, 0, 13);
-            LayoutOrder = 1;
             ZIndex = 5;
-            Parent = ToggleRow;
+            Parent = Container;
         });
 
         Library:AddToRegistry(ToggleOuter, {
@@ -1912,40 +1895,39 @@ do
             BorderColor3 = 'OutlineColor';
         });
 
+        local LabelTextW = select(1, Library:GetTextBounds(Info.Text, Library.Font, 14));
+
         local ToggleLabel = Library:CreateLabel({
-            AutomaticSize = Enum.AutomaticSize.X;
-            Size = UDim2.new(0, 0, 0, 13);
-            LayoutOrder = 2;
+            Size = UDim2.new(0, LabelTextW + 32, 1, 0);
+            Position = UDim2.new(1, 6, 0, 0);
             TextSize = 14;
             Text = Info.Text;
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 6;
-            Parent = ToggleRow;
-        });
-
-        local AddonHolder = Library:Create('Frame', {
-            BackgroundTransparency = 1;
-            AutomaticSize = Enum.AutomaticSize.X;
-            Size = UDim2.new(0, 0, 0, 13);
-            LayoutOrder = 3;
-            ZIndex = 9;
-            Parent = ToggleRow;
+            Parent = ToggleInner;
         });
 
         Library:Create('UIListLayout', {
             Padding = UDim.new(0, 4);
             FillDirection = Enum.FillDirection.Horizontal;
             HorizontalAlignment = Enum.HorizontalAlignment.Left;
-            VerticalAlignment = Enum.VerticalAlignment.Center;
             SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = AddonHolder;
+            Parent = ToggleLabel;
+        });
+
+        Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.fromOffset(LabelTextW + 4, 1);
+            LayoutOrder = 1;
+            ZIndex = 6;
+            Parent = ToggleLabel;
         });
 
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 7;
-            Parent = ToggleRow;
+            Size = UDim2.new(0, 170, 1, 0);
+            ZIndex = 8;
+            Parent = ToggleOuter;
         });
 
         Library:OnHighlight(ToggleRegion, ToggleOuter,
@@ -2010,7 +1992,6 @@ do
         Groupbox:Resize();
 
         Toggle.TextLabel = ToggleLabel;
-        Toggle.AddonHolder = AddonHolder;
         Toggle.Container = Container;
         setmetatable(Toggle, BaseAddons);
 
