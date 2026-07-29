@@ -318,6 +318,31 @@ function Library:GetDarkerColor(Color)
     local H, S, V = Color3.toHSV(Color);
     return Color3.fromHSV(H, S, V / 1.5);
 end;
+
+function Library:GetLighterColor(Color)
+    local H, S, V = Color3.toHSV(Color);
+    return Color3.fromHSV(H, math.clamp(S * 0.9, 0, 1), math.clamp(V * 1.12, 0, 1));
+end;
+
+function Library:ApplySmoothGradient(Parent, Color, Rotation)
+    local Gradient = Parent:FindFirstChild('SmoothGradient');
+
+    if not Gradient then
+        Gradient = Library:Create('UIGradient', {
+            Name = 'SmoothGradient';
+            Parent = Parent;
+        });
+    end;
+
+    Gradient.Rotation = Rotation or 90;
+    Gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Library:GetLighterColor(Color));
+        ColorSequenceKeypoint.new(1, Library:GetDarkerColor(Color));
+    });
+
+    Parent.BackgroundColor3 = Color3.new(1, 1, 1);
+end;
+
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
 
 function Library:AddToRegistry(Instance, Properties, IsHud)
@@ -374,6 +399,12 @@ function Library:UpdateColorsUsingRegistry()
             elseif type(ColorIdx) == 'function' then
                 Object.Instance[Property] = ColorIdx()
             end
+        end;
+    end;
+
+    for _, Option in next, Options do
+        if Option.Type == 'Slider' and type(Option.UpdateColors) == 'function' then
+            Option:UpdateColors();
         end;
     end;
 end;
@@ -438,13 +469,15 @@ do
         ColorPicker:SetHSVFromRGB(ColorPicker.Value);
 
         local DisplayFrame = Library:Create('Frame', {
-            BackgroundColor3 = ColorPicker.Value;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             BorderMode = Enum.BorderMode.Inset;
             Size = UDim2.new(0, 24, 0, 14);
             ZIndex = 6;
             Parent = ToggleLabel;
         });
+
+        Library:ApplySmoothGradient(DisplayFrame, ColorPicker.Value, 90);
 
         -- Transparency image taken from https://github.com/matas3535/SplixPrivateDrawingLibrary/blob/main/Library.lua cus i'm lazy
         local CheckerFrame = Library:Create('ImageLabel', {
@@ -845,10 +878,11 @@ do
             SatVibMap.BackgroundColor3 = Color3.fromHSV(ColorPicker.Hue, 1, 1);
 
             Library:Create(DisplayFrame, {
-                BackgroundColor3 = ColorPicker.Value;
                 BackgroundTransparency = ColorPicker.Transparency;
                 BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             });
+
+            Library:ApplySmoothGradient(DisplayFrame, ColorPicker.Value, 90);
 
             if TransparencyBoxInner then
                 TransparencyBoxInner.BackgroundColor3 = ColorPicker.Value;
@@ -2017,29 +2051,26 @@ do
         });
 
         local Fill = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderColor3 = Library.AccentColorDark;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
         });
 
+        Library:ApplySmoothGradient(Fill, Library.AccentColor, 0);
+
         Library:AddToRegistry(Fill, {
-            BackgroundColor3 = 'AccentColor';
             BorderColor3 = 'AccentColorDark';
         });
 
         local HideBorderRight = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Library:GetDarkerColor(Library.AccentColor);
             BorderSizePixel = 0;
             Position = UDim2.new(1, 0, 0, 0);
             Size = UDim2.new(0, 1, 1, 0);
             ZIndex = 8;
             Parent = Fill;
-        });
-
-        Library:AddToRegistry(HideBorderRight, {
-            BackgroundColor3 = 'AccentColor';
         });
 
         local DisplayLabel = Library:CreateLabel({
@@ -2060,8 +2091,9 @@ do
         end
 
         function Slider:UpdateColors()
-            Fill.BackgroundColor3 = Library.AccentColor;
+            Library:ApplySmoothGradient(Fill, Library.AccentColor, 0);
             Fill.BorderColor3 = Library.AccentColorDark;
+            HideBorderRight.BackgroundColor3 = Library:GetDarkerColor(Library.AccentColor);
         end;
 
         function Slider:Display()
