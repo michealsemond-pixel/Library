@@ -445,6 +445,7 @@ do
     local Funcs = {};
 
     function Funcs:AddColorPicker(Idx, Info)
+        local AddonParent = self.AddonHolder or self.TextLabel;
         local ToggleLabel = self.TextLabel;
         -- local Container = self.Container;
 
@@ -473,8 +474,8 @@ do
             BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             BorderMode = Enum.BorderMode.Inset;
             Size = UDim2.new(0, 24, 0, 14);
-            ZIndex = 6;
-            Parent = ToggleLabel;
+            ZIndex = 10;
+            Parent = AddonParent;
         });
 
         Library:ApplySmoothGradient(DisplayFrame, ColorPicker.Value, 90);
@@ -1040,6 +1041,7 @@ do
 
     function Funcs:AddKeyPicker(Idx, Info)
         local ParentObj = self;
+        local AddonParent = self.AddonHolder or self.TextLabel;
         local ToggleLabel = self.TextLabel;
         local Container = self.Container;
 
@@ -1066,7 +1068,7 @@ do
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 28, 0, 15);
             ZIndex = 6;
-            Parent = ToggleLabel;
+            Parent = AddonParent;
         });
 
         local PickInner = Library:Create('Frame', {
@@ -1867,12 +1869,29 @@ do
         local Groupbox = self;
         local Container = Groupbox.Container;
 
+        local ToggleRow = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, 0, 0, 13);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        Library:Create('UIListLayout', {
+            FillDirection = Enum.FillDirection.Horizontal;
+            VerticalAlignment = Enum.VerticalAlignment.Center;
+            HorizontalAlignment = Enum.HorizontalAlignment.Left;
+            Padding = UDim.new(0, 4);
+            SortOrder = Enum.SortOrder.LayoutOrder;
+            Parent = ToggleRow;
+        });
+
         local ToggleOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 13, 0, 13);
+            LayoutOrder = 1;
             ZIndex = 5;
-            Parent = Container;
+            Parent = ToggleRow;
         });
 
         Library:AddToRegistry(ToggleOuter, {
@@ -1894,28 +1913,39 @@ do
         });
 
         local ToggleLabel = Library:CreateLabel({
-            Size = UDim2.new(0, 216, 1, 0);
-            Position = UDim2.new(1, 6, 0, 0);
+            AutomaticSize = Enum.AutomaticSize.X;
+            Size = UDim2.new(0, 0, 0, 13);
+            LayoutOrder = 2;
             TextSize = 14;
             Text = Info.Text;
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 6;
-            Parent = ToggleInner;
+            Parent = ToggleRow;
+        });
+
+        local AddonHolder = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            AutomaticSize = Enum.AutomaticSize.X;
+            Size = UDim2.new(0, 0, 0, 13);
+            LayoutOrder = 3;
+            ZIndex = 9;
+            Parent = ToggleRow;
         });
 
         Library:Create('UIListLayout', {
             Padding = UDim.new(0, 4);
             FillDirection = Enum.FillDirection.Horizontal;
-            HorizontalAlignment = Enum.HorizontalAlignment.Right;
+            HorizontalAlignment = Enum.HorizontalAlignment.Left;
+            VerticalAlignment = Enum.VerticalAlignment.Center;
             SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = ToggleLabel;
+            Parent = AddonHolder;
         });
 
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, 170, 1, 0);
-            ZIndex = 8;
-            Parent = ToggleOuter;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 7;
+            Parent = ToggleRow;
         });
 
         Library:OnHighlight(ToggleRegion, ToggleOuter,
@@ -1980,6 +2010,7 @@ do
         Groupbox:Resize();
 
         Toggle.TextLabel = ToggleLabel;
+        Toggle.AddonHolder = AddonHolder;
         Toggle.Container = Container;
         setmetatable(Toggle, BaseAddons);
 
